@@ -1,0 +1,9 @@
+<div>production: {{ env }}</div>
+
+@if (productService.productResource.value(); as product) {
+<p>Title: {{ product.title }}</p>
+} @else if (productService.productResource.error(); ) {
+<p>load failed</p>
+} @else if(productService.productResource.isLoading()) {
+<p>loading...</p>
+}
