@@ -9,11 +9,6 @@ type Product = {
 })
 export class ProductService {
   id = signal(1);
-  positionOptions: PositionOptions = {
-    enableHighAccuracy: true,
-    maximumAge: 0, // Not use a cached position
-    timeout: 100000 // ms
-  };
 
   constructor() { }
 
@@ -23,27 +18,26 @@ export class ProductService {
       const resp = await fetch(`https://dummyjson.com/products/${id}`, {
         signal: abortSignal,
       });
-      // console.log(resp.json())
       return resp.json() as Promise<Product>;
     },
   });
 
-  getGeoLocation() {
-    let watchId;
-
-    const onSuccess: PositionCallback = (pos: any) => {
-      console.log('pos:', pos)
-      // observer.next(pos);
+  getCurrentPosition(): Promise<GeolocationPosition | undefined>{
+    const positionOptions: PositionOptions = {
+      enableHighAccuracy: true,
+      maximumAge: 0, // Not use a cached position
+      timeout: 100000 // ms
     };
 
-    const onError: PositionErrorCallback | any = () => {
-      // observer.error(error);
-    };
-
-    if ('geolocation' in navigator) {
-      watchId = navigator.geolocation.watchPosition(onSuccess, onError, this.positionOptions);
-    } else {
-      onError('Geolocation not available');
-    }
+    return new Promise(
+      (
+        resolve: (pos: GeolocationPosition) => void,
+        reject: (err: GeolocationPositionError) => void
+      ) => {
+        if (navigator.geolocation) {
+          const watchId = navigator.geolocation.getCurrentPosition(resolve, reject, positionOptions);
+        }
+      }
+    );
   }
 }

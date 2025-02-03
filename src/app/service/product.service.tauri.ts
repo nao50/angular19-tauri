@@ -1,5 +1,11 @@
 import { Injectable, resource, ResourceRef, signal } from '@angular/core';
 import { fetch as fetch2 } from '@tauri-apps/plugin-http';
+import {
+  checkPermissions,
+  requestPermissions,
+  getCurrentPosition,
+  watchPosition
+} from '@tauri-apps/plugin-geolocation'
 
 type Product = {
   title: string;
@@ -23,6 +29,15 @@ export class ProductService {
     },
   });
 
-  getGeoLocation() {
+  async getCurrentPosition(): Promise<GeolocationPosition | undefined>{
+    let permissions = await checkPermissions()
+    if (permissions.location === 'prompt' || permissions.location === 'prompt-with-rationale') {
+      permissions = await requestPermissions(['location'])
+    }
+
+    if (permissions.location === 'granted') {
+      return getCurrentPosition()
+    }
+    return undefined
   }
 }
